@@ -1,0 +1,34 @@
+# app configuration
+app:
+  # mode should be one of [debug release test]
+  mode: debug
+  # app name
+  name: go-chat
+  # if swagger api doc enable, the apidoc can visit on http://http.address/swagger/index.html
+  swagger: true
+# mysql configuration
+mysql:
+  url: 127.0.0.1:3306
+  database: go_chat
+  username: root
+  password: root
+# redis configuration
+redis:
+  addr: 127.0.0.1:6379
+  password: root
+  DB: 0
+  poolSize: 30
+  minIdleConn: 30
+# log configuration
+log:
+  # min level should be one of [fatal panic error warn info debug trace]
+  level: debug
+  # a log entry whose level below or equal info will be output specified dir path
+  infoLog: E:\学习笔记\go-chat\chat-back\info.log
+  # a log entry whose level above info will be output specified dir path
+  errorLog: E:\学习笔记\go-chat\chat-back\error.log
+# auth configuration
+auth:
+  jwt:
+    issuer: Octopus
+    expireTime: 24

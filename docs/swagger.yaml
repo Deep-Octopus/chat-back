@@ -1,0 +1,31 @@
+info:
+  contact: {}
+paths:
+  /index:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - 首页
+  /user/createUser:
+    post:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      tags:
+      - 新增用户
+  /user/getUserList:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      tags:
+      - 获取用户列表
+swagger: "2.0"
