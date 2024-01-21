@@ -1,7 +1,6 @@
-package test
+package main
 
 import (
-	"fmt"
 	"go-chat/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,11 +14,12 @@ func main() {
 	//迁移schema
 	db.AutoMigrate(&models.UserBasic{})
 
-	user := &models.UserBasic{}
-	user.Name = "张洁"
-	db.Create(user)
-
-	fmt.Println(db.First(user, 1))
-
-	db.Model(user).Update("Password", "1234")
+	//msg := &models.GroupBasic{}
+	//msg.FromId = 1
+	//msg.TargetId = 2
+	//db.Create(msg)
+	//
+	//fmt.Println(db.First(msg, 1))
+	//
+	//db.Model(msg).Update("target_id", "4")
 }

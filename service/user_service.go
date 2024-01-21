@@ -10,13 +10,30 @@ import (
 func GetUserList() []*models.UserBasic {
 	return models.GetUserList()
 }
-func GetUserByName(name string) *models.UserBasic {
-	return models.TakeUserByName(name)
+
+func GetUserByUsername(username string) *models.UserBasic {
+	return models.TakeUserByUsername(username)
 }
+func GetFriendByUsername(userId uint) []models.UserBasic {
+	return models.SearchFriend(userId)
+}
+func GetGroupByUsername(userId uint) []models.GroupBasic {
+	return models.SearchGroup(userId)
+}
+func GetListMessageByUsername(userId uint) []models.ListMessageDto {
+	lms := make([]models.ListMessageDto, 0)
+	userLms := models.SearchFriendAndLastMessage(userId)
+	groupLms := models.SearchGroupAndLastMessage(userId)
+	lms = append(lms, groupLms...)
+	lms = append(lms, userLms...)
+	return lms
+}
+
 func CreateUser(user *models.UserBasic) error {
-	if models.TakeUserByName(user.Name).ID != 0 {
-		return errors.New("用户已经存在")
-	}
+	//if models.TakeUserByUsername(user.Username).ID != 0 {
+	//	return errors.New("用户已经存在")
+	//}
+	user.Username = utils.GenerateAccountNumber(10)
 	user.Password, _ = utils.HashPassword(user.Password)
 	if err := models.CreateUser(user); err != nil {
 		return errors.New("新增用户失败")

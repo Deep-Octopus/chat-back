@@ -9,18 +9,20 @@ import (
 
 type UserBasic struct {
 	gorm.Model
-	Name          string
-	Password      string
-	Phone         string `valid:"matches(^1[3-9]{1}\\d{9}$)"`
-	Email         string `valid:"email"`
-	Identity      string
-	ClintIp       string
-	ClientPort    string
-	LoginTime     time.Time
-	HeartbeatTime time.Time
-	LogoutTime    time.Time
-	IsLogout      bool
-	DeviceInfo    string
+	Name          string    `json:"name"`
+	Username      string    `json:"username"`
+	Password      string    `json:"password"`
+	Phone         string    `valid:"matches(^1[3-9]{1}\\d{9}$)" json:"phone"`
+	Email         string    `valid:"email" json:"email"`
+	Identity      string    `json:"identity"`
+	ClintIp       string    `json:"clintIp"`
+	ClientPort    string    `json:"clientPort"`
+	LoginTime     time.Time `json:"loginTime"`
+	HeartbeatTime time.Time `json:"heartbeatTime"`
+	LogoutTime    time.Time `json:"logoutTime"`
+	IsLogout      bool      `json:"isLogout"`
+	DeviceInfo    string    `json:"deviceInfo"`
+	Desc          string    `json:"desc"` //预留字段
 }
 
 func (table *UserBasic) TableName() string {
@@ -37,9 +39,19 @@ func TakeUserById(id uint) *UserBasic {
 	utils.DB.Where("id = ?", id).Take(&user)
 	return &user
 }
+func TakeGroupById(id uint) *GroupBasic {
+	var group GroupBasic
+	utils.DB.Where("id = ?", id).Take(&group)
+	return &group
+}
 func TakeUserByName(name string) *UserBasic {
 	var user UserBasic
 	utils.DB.Where("name = ?", name).Take(&user)
+	return &user
+}
+func TakeUserByUsername(username string) *UserBasic {
+	var user UserBasic
+	utils.DB.Where("username = ?", username).Take(&user)
 	return &user
 }
 func TakeUserByEmail(email string) *UserBasic {
@@ -68,6 +80,6 @@ func UpdateUser(user *UserBasic) error {
 	return utils.DB.Model(&oldUser).Updates(user).Error
 }
 
-func GetTokenByUserName(name string) string {
-	return TakeUserByName(name).Identity
+func GetTokenByUserName(username string) string {
+	return TakeUserByUsername(username).Identity
 }

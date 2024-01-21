@@ -1,60 +1,69 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"go-chat/config"
 	resp "go-chat/middleware"
 	"go-chat/models"
 	"go-chat/service"
 	"go-chat/utils"
 	"net/http"
 	"strconv"
-	"time"
 )
-
-type UserApi struct {
-}
 
 // GetUserList
 // @Tags 获取用户列表
 // @Produce json
 // @Success 200
 // @Router /user/getUserList [get]
-func (u UserApi) GetUserList(c *gin.Context) {
+func GetUserList(c *gin.Context) {
 	userList := service.GetUserList()
 	c.JSON(http.StatusOK, resp.OK.WithData(userList))
+}
+
+// GetUser
+// @Tags 获取用户
+// @Produce json
+// @Success 200
+// @Router /user/getUser [get]
+func GetUser(c *gin.Context) {
+	username := c.Query("username")
+	user := service.GetUserByUsername(username)
+	if user.ID == 0 {
+		c.JSON(http.StatusNotFound, resp.Err.WithMsg("用户不存在"))
+		return
+	}
+	c.JSON(http.StatusOK, resp.OK.WithData(&user))
 }
 
 // CreateUser
 // @Tags 新增用户
 // @Success 200
 // @Router /user/createUser [post]
-func (u UserApi) CreateUser(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, resp.ErrParam)
 		return
 	}
+
 	if err := service.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, resp.Err.WithMsg(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, resp.OK.WithMsg("新增成功"))
+	c.JSON(http.StatusOK, resp.OK.WithData(user.Username))
 }
 
 // Login
 // @Tags 登录
 // @Success 200
 // @Router /user/login [post]
-func (u UserApi) Login(c *gin.Context) {
+func Login(c *gin.Context) {
 	user := models.UserBasic{}
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, resp.ErrParam)
 		return
 	}
-	tmpUser := service.GetUserByName(user.Name)
+	tmpUser := service.GetUserByUsername(user.Username)
 	if tmpUser.ID == 0 {
 		c.JSON(http.StatusNotFound, resp.Err.WithMsg("用户不存在"))
 		return
@@ -69,14 +78,15 @@ func (u UserApi) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, resp.Err.WithMsg("Token保存错误"))
 		return
 	}
-	c.JSON(http.StatusOK, resp.OK.WithData(tmpUser.Identity))
+	tmpUser.Password = "******"
+	c.JSON(http.StatusOK, resp.OK.WithData(tmpUser))
 }
 
 // DeleteUser
 // @Tags 删除用户
 // @Success 200
 // @Router /user/deleteUser [get]
-func (u UserApi) DeleteUser(c *gin.Context) {
+func DeleteUser(c *gin.Context) {
 	user := models.UserBasic{}
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
@@ -99,7 +109,7 @@ func (u UserApi) DeleteUser(c *gin.Context) {
 // @param email formData string false "email"
 // @Success 200
 // @Router /user/updateUser [post]
-func (u UserApi) UpdateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context) {
 	user := models.UserBasic{}
 
 	if err := c.ShouldBind(&user); err != nil {
@@ -118,33 +128,21 @@ func (u UserApi) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, resp.OK.WithMsg("修改成功"))
 }
 
-func (u UserApi) SendMsg(ctx *gin.Context) {
-	ws, err := config.UpGrade.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	// 关闭websocket连接
-	defer func(ws *websocket.Conn) {
-		err := ws.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(ws)
-
-	MsgHandler(ws, ctx)
+func GetFriends(ctx *gin.Context) {
+	username := ctx.Query("username")
+	user := models.TakeUserByUsername(username)
+	friends := service.GetFriendByUsername(user.ID)
+	ctx.JSON(http.StatusOK, resp.OK.WithData(friends))
 }
-
-func MsgHandler(ws *websocket.Conn, ctx *gin.Context) {
-	for {
-		msg, err := utils.Subscribe(ctx, "Octopus")
-		if err != nil {
-			fmt.Println(err)
-		}
-		tm := time.Now().Format(config.DateTimeFormat)
-		m := fmt.Sprintf("[ws][%s]:%s", tm, msg)
-		if err := ws.WriteMessage(1, []byte(m)); err != nil {
-			fmt.Println(err)
-		}
-	}
+func GetGroups(ctx *gin.Context) {
+	username := ctx.Query("username")
+	user := models.TakeUserByUsername(username)
+	groups := service.GetGroupByUsername(user.ID)
+	ctx.JSON(http.StatusOK, resp.OK.WithData(groups))
+}
+func GetListMessage(ctx *gin.Context) {
+	username := ctx.Query("username")
+	user := models.TakeUserByUsername(username)
+	lms := service.GetListMessageByUsername(user.ID)
+	ctx.JSON(http.StatusOK, resp.OK.WithData(lms))
 }

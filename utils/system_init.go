@@ -47,7 +47,7 @@ func InitMySQL(cfg *config.Mysql) {
 }
 
 func getMySQLDns(mysqlConfig *config.Mysql) string {
-	return mysqlConfig.Username + ":" + mysqlConfig.Password + "@tcp(" + mysqlConfig.Url + ")/" + mysqlConfig.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
+	return mysqlConfig.Username + ":" + mysqlConfig.Password + "@tcp(" + mysqlConfig.Url + ")/" + mysqlConfig.Database + "?charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local"
 }
 func InitRedis(cfg *config.Redis) {
 	REDIS = redis.NewClient(&redis.Options{

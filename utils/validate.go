@@ -1,6 +1,8 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"golang.org/x/crypto/bcrypt"
+)
 
 // HashPassword 使用 bcrypt 对密码进行散列
 func HashPassword(password string) (string, error) {
